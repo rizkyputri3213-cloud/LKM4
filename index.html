@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LKM Pertemuan 6 S2: Lima Kasus Alokasi Sumber Daya</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--bg:#EEF4F5;--card:#fff;--ink:#12303B;--muted:#4D6770;--line:#C9DADF;--sea:#1F7A8C;--seaink:#fff;--amber:#E8A317;--amberbg:#FFF4D6;--ok:#1B7F4B;--bad:#C8442F;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1E24;--card:#152B33;--ink:#E6F1F3;--muted:#9DB6BE;--line:#28434C;--sea:#5CC0D2;--seaink:#0E1E24;--amber:#F2B63D;--amberbg:#3A2F10;--ok:#55C98A;--bad:#F0846F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1E24;--card:#152B33;--ink:#E6F1F3;--muted:#9DB6BE;--line:#28434C;--sea:#5CC0D2;--seaink:#0E1E24;--amber:#F2B63D;--amberbg:#3A2F10;--ok:#55C98A;--bad:#F0846F;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif}
+h1,h2{font-family:"Bricolage Grotesque","Trebuchet MS",sans-serif;line-height:1.15;margin:0}
+.wrap{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+header h1{font-size:clamp(1.8rem,6vw,2.8rem);font-weight:800;margin:6px 0 8px}
+.sub{color:var(--muted);margin:0 0 14px}
+.who{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:12px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tab{background:var(--card);color:var(--ink);border:1.5px solid var(--line);margin:0}
+.tab[aria-pressed=true]{background:var(--sea);color:var(--seaink);border-color:var(--sea)}
+.prog{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.pg{flex:1;min-width:200px}
+.track{height:12px;background:var(--line);border-radius:6px;overflow:hidden}
+#bar{height:100%;width:0;background:var(--sea);transition:width .4s}
+#score{font-weight:700;font-size:.95rem;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin:16px 0}
+.card h2{font-size:1.4rem;margin-bottom:8px}
+.case{border-left:6px solid var(--amber);background:var(--amberbg)}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+th{background:var(--card)}
+.task{border-left:6px solid var(--line)}
+.task.done{border-left-color:var(--ok)}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+.eq input{width:92px}
+.eq b{min-width:130px}
+.xy{display:flex;gap:12px;flex-wrap:wrap}
+.xy label{display:flex;align-items:center;gap:8px}
+.xy input{width:90px}
+button{font:inherit;font-weight:700;background:var(--sea);color:var(--seaink);border:0;border-radius:8px;padding:9px 16px;cursor:pointer;margin-top:8px}
+button.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);margin:0}
+.fb{margin-top:8px;font-weight:700;min-height:1.4em}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.chk{display:block;margin:4px 0}
+.chk input{width:auto;margin-right:8px}
+.gauge{margin:10px 0}
+.gl{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.95rem}
+.gt{height:22px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:4px}
+.gf{height:100%;width:0;background:var(--sea);transition:width .25s,background .25s}
+.gf.full{background:var(--ok)}.gf.over{background:var(--bad)}
+input[type=range]{padding:0;border:0;accent-color:var(--sea)}
+.sl{display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;margin:6px 0}
+.note{color:var(--muted);font-size:.92rem}
+@media (max-width:560px){.who{grid-template-columns:1fr}.sl{grid-template-columns:90px 1fr 40px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<p class="sub">LKM Pertemuan 6, Sub-CPMK 6: sistem persamaan linear dua variabel. Case Method, tugas kelompok.</p>
+<h1>Mengalokasikan dua sumber daya dalam kebijakan publik</h1>
+<p class="sub">Magister Ilmu Pemerintahan dan Administrasi Negara. Kerjakan lima langkah pada kasus di bawah, lalu tekan “Periksa” pada tiap langkah.</p>
+<div class="who"><input id="kel" placeholder="Nama kelompok" aria-label="Nama kelompok"><input id="ang" placeholder="Nama anggota (pisahkan dengan koma)" aria-label="Nama anggota"></div>
+<div class="tabs" id="tabs" role="group" aria-label="Pilih kasus"></div>
+<div class="prog"><div class="pg"><div class="track"><div id="bar"></div></div><div id="score">0 dari 5 langkah benar</div></div><button class="ghost" id="dl" onclick="simpan()">Simpan hasil kerja</button></div>
+<div class="fb" id="dlmsg" aria-live="polite"></div>
+</header>
+<div id="cases"></div>
+</div>
+<script>
+const C=[
+{n:"Pelatihan ASN",t:"Kasus 1. Pelatihan kepemimpinan dan analitik kebijakan ASN",k:"Badan Pengembangan SDM Provinsi Cakrawala merancang dua program pelatihan ASN. Kepala Badan meminta tim analis menentukan jumlah angkatan tiap program agar seluruh anggaran dan seluruh jam widyaiswara terpakai habis.",A:"Pelatihan Kepemimpinan Digital",B:"Pelatihan Analitik Kebijakan",un:"angkatan",r1:{n:"Anggaran",u:"juta rupiah",a:80,b:60,c:1200},r2:{n:"Jam widyaiswara",u:"jam",a:30,b:20,c:420},sol:{x:6,y:12},s:{r:2,c:440,x:12,y:4},isu:"Solusi matematis menghabiskan semua sumber daya. Kriteria non-angka apa (misalnya pemerataan kompetensi antar perangkat daerah) yang perlu dipertimbangkan sebelum Kepala Badan memutuskan?"},
+{n:"Layanan keliling",t:"Kasus 2. Layanan administrasi kependudukan jemput bola",k:"Dinas Kependudukan dan Pencatatan Sipil Kota Sinar Baru menjalankan dua layanan jemput bola ke kelurahan. Wali Kota meminta jumlah kunjungan tiap layanan ditetapkan agar anggaran operasional dan hari kerja petugas terpakai habis.",A:"Layanan KTP-el keliling",B:"Layanan perizinan UMKM keliling",un:"kunjungan",r1:{n:"Anggaran operasional",u:"juta rupiah",a:10,b:6,c:210},r2:{n:"Hari kerja petugas",u:"hari",a:3,b:2,c:65},sol:{x:15,y:10},s:{r:2,c:68,x:6,y:25},isu:"Kunjungan keliling menjangkau kelurahan yang berbeda. Bagaimana prinsip keadilan akses dan akuntabilitas pelayanan memengaruhi keputusan, selain hasil hitungan?"},
+{n:"Dana Desa",t:"Kasus 3. Belanja Dana Desa untuk padat karya",k:"Pemerintah Desa Karang Asri menyusun belanja Dana Desa untuk dua kegiatan padat karya. Musyawarah desa meminta kombinasi jumlah kegiatan yang menghabiskan dana dan tenaga kerja (hari orang kerja, HOK) yang tersedia.",A:"Jalan usaha tani",B:"Embung desa",un:"kegiatan",r1:{n:"Dana Desa",u:"juta rupiah",a:40,b:60,c:480},r2:{n:"Tenaga kerja",u:"HOK",a:30,b:20,c:260},sol:{x:6,y:4},s:{r:2,c:210,x:3,y:6},isu:"Hasil hitungan hanya menentukan jumlah kegiatan, bukan lokasi dan penerima manfaatnya. Bagaimana musyawarah desa dan transparansi perlu mengawal alokasi ini?"},
+{n:"Stunting",t:"Kasus 4. Percepatan penurunan stunting di tingkat desa",k:"Pemerintah Kabupaten Tirta Mulya menjalankan percepatan penurunan stunting melalui dua paket intervensi. Bupati meminta jumlah desa sasaran tiap paket ditetapkan agar anggaran dan hari kerja kader terpakai habis.",A:"Paket gizi",B:"Paket edukasi keluarga",un:"desa",r1:{n:"Anggaran",u:"juta rupiah",a:25,b:15,c:450},r2:{n:"Hari kerja kader",u:"hari",a:8,b:6,c:156},sol:{x:12,y:10},s:{r:1,c:420,x:6,y:18},isu:"Penurunan stunting tidak berubah linear terhadap jumlah paket. Apa keterbatasan model linear ini bila dijadikan dasar kebijakan?"},
+{n:"Audit Inspektorat",t:"Kasus 5. Perencanaan audit Inspektorat Daerah",k:"Inspektorat Daerah Kota Bumi Lestari merencanakan dua jenis audit tahun ini. Inspektur meminta jumlah audit tiap jenis ditetapkan agar seluruh anggaran dan seluruh hari kerja auditor terpakai habis.",A:"Audit kinerja",B:"Audit kepatuhan",un:"audit",r1:{n:"Anggaran",u:"juta rupiah",a:20,b:10,c:300},r2:{n:"Hari kerja auditor",u:"hari",a:9,b:6,c:153},sol:{x:9,y:12},s:{r:2,c:150,x:10,y:10},isu:"Perubahan kecil pada hari kerja auditor menggeser komposisi audit. Apa implikasinya bagi perencanaan berbasis risiko dan independensi Inspektorat?"}
+];
+C.splice(0,C.length,C[3]);document.title='LKM Pertemuan 6 S2: '+C[0].t;
+const $=id=>document.getElementById(id);
+const f=n=>n.toLocaleString('id-ID');
+const num=id=>{const v=$(id).value.trim().replace(',','.');return v===''?NaN:Number(v)};
+const prop=(a,b,c,A,B,Cc)=>a>0&&a*B===b*A&&a*Cc===c*A;
+const D=C.map(()=>({}));let cur=0,dlns=null;
+function tpl(i,k){const{r1,r2,s}=k,sr=s.r===1?r1:r2,mx=2*Math.max(k.sol.x,k.sol.y,s.x,s.y);
+const row=(l,a,b)=>`<tr><td>${l}</td><td>${a}</td><td>${b}</td></tr>`;
+return `<div id="k${i}" ${i?'hidden':''}>
+<section class="card case"><h2>${k.t}</h2><p>${k.k}</p><table><tr><th></th><th>${r1.n}</th><th>${r2.n}</th></tr>
+${row('<b>Program A</b>: '+k.A+' (per '+k.un+')',f(r1.a)+' '+r1.u,f(r2.a)+' '+r2.u)}
+${row('<b>Program B</b>: '+k.B+' (per '+k.un+')',f(r1.b)+' '+r1.u,f(r2.b)+' '+r2.u)}
+${row('<b>Tersedia</b>',f(r1.c)+' '+r1.u,f(r2.c)+' '+r2.u)}</table></section>
+<section class="card"><h2>Lab coba-coba (opsional)</h2><p class="note">Geser jumlah tiap program. Bisakah kedua batang penuh bersamaan tanpa melewati batas?</p>
+<div class="sl"><label for="${i}-sa">Program A</label><input type="range" id="${i}-sa" min="0" max="${mx}" value="0" oninput="lab(${i})"><b id="${i}-va">0</b></div>
+<div class="sl"><label for="${i}-sb">Program B</label><input type="range" id="${i}-sb" min="0" max="${mx}" value="0" oninput="lab(${i})"><b id="${i}-vb">0</b></div>
+<div class="gauge"><div class="gl"><span>${r1.n}</span><span id="${i}-gl1"></span></div><div class="gt"><div class="gf" id="${i}-g1"></div></div></div>
+<div class="gauge"><div class="gl"><span>${r2.n}</span><span id="${i}-gl2"></span></div><div class="gt"><div class="gf" id="${i}-g2"></div></div></div>
+<div class="fb" id="${i}-lm" aria-live="polite"></div></section>
+<section class="card task" id="${i}-t1"><h2>Langkah 1. Identifikasi kasus</h2><p>Centang dua sumber daya yang jumlahnya dibatasi.</p>
+<label class="chk"><input type="checkbox" name="c1-${i}" value="r1">${r1.n}</label>
+<label class="chk"><input type="checkbox" name="c1-${i}" value="p">Jumlah penduduk sasaran</label>
+<label class="chk"><input type="checkbox" name="c1-${i}" value="r2">${r2.n}</label>
+<label class="chk"><input type="checkbox" name="c1-${i}" value="l">Luas wilayah</label>
+<button onclick="c1(${i})">Periksa</button><div class="fb" id="${i}-f1" aria-live="polite"></div></section>
+<section class="card task" id="${i}-t2"><h2>Langkah 2. Susun model</h2><p>Misalkan x = jumlah Program A dan y = jumlah Program B. Tulis dua persamaannya dengan satuan seperti pada tabel.</p>
+<div class="eq"><b>${r1.n}</b><input id="${i}-a1" inputmode="decimal" aria-label="Koefisien x, ${r1.n}">x +<input id="${i}-b1" inputmode="decimal" aria-label="Koefisien y, ${r1.n}">y =<input id="${i}-k1" inputmode="decimal" aria-label="Batas ${r1.n}"></div>
+<div class="eq"><b>${r2.n}</b><input id="${i}-a2" inputmode="decimal" aria-label="Koefisien x, ${r2.n}">x +<input id="${i}-b2" inputmode="decimal" aria-label="Koefisien y, ${r2.n}">y =<input id="${i}-k2" inputmode="decimal" aria-label="Batas ${r2.n}"></div>
+<button onclick="c2(${i})">Periksa</button><div class="fb" id="${i}-f2" aria-live="polite"></div></section>
+<section class="card task" id="${i}-t3"><h2>Langkah 3. Selesaikan SPLDV</h2><p>Gunakan eliminasi atau substitusi. Tulis langkah kelompok, lalu isi hasilnya.</p>
+<textarea rows="3" placeholder="Langkah penyelesaian kelompok…" aria-label="Langkah penyelesaian"></textarea>
+<div class="xy" style="margin-top:8px"><label>x =<input id="${i}-x3" inputmode="decimal" aria-label="Hasil x"></label><label>y =<input id="${i}-y3" inputmode="decimal" aria-label="Hasil y"></label></div>
+<button onclick="c3(${i})">Periksa</button><div class="fb" id="${i}-f3" aria-live="polite"></div></section>
+<section class="card task" id="${i}-t4"><h2>Langkah 4. Verifikasi</h2><p>Masukkan x dan y dari langkah 3 ke kedua batas. Apakah semuanya habis terpakai?</p>
+<button onclick="c4(${i})">Hitung verifikasi</button><div class="fb" id="${i}-f4" aria-live="polite"></div></section>
+<section class="card task" id="${i}-t5"><h2>Langkah 5. Skenario kebijakan</h2><p>Kondisi berubah: <b>${sr.n} menjadi ${f(s.c)} ${sr.u}</b>, sumber daya lainnya tetap. Hitung x dan y yang baru.</p>
+<div class="xy"><label>x =<input id="${i}-x5" inputmode="decimal" aria-label="Skenario, hasil x"></label><label>y =<input id="${i}-y5" inputmode="decimal" aria-label="Skenario, hasil y"></label></div>
+<p style="margin-bottom:4px">Dampak dibanding rencana awal:</p>
+<select id="${i}-d5" aria-label="Dampak skenario"><option value="">Pilih dampak…</option><option value="uu">Program A naik, Program B naik</option><option value="ud">Program A naik, Program B turun</option><option value="du">Program A turun, Program B naik</option><option value="dd">Program A turun, Program B turun</option></select>
+<button onclick="c5(${i})">Periksa</button><div class="fb" id="${i}-f5" aria-live="polite"></div></section>
+<section class="card"><h2>Telaah kritis dan rekomendasi</h2><p>${k.isu}</p>
+<textarea rows="2" placeholder="Jawaban telaah kritis…" aria-label="Telaah kritis"></textarea>
+<p class="note" style="margin-top:10px">Rekomendasi untuk pengambil keputusan: jumlah tiap program, alasan, dan satu risiko pelaksanaan.</p>
+<textarea rows="4" placeholder="Tulis rekomendasi kelompok…" aria-label="Rekomendasi"></textarea></section></div>`}
+$('cases').innerHTML=C.map((k,i)=>tpl(i,k)).join('');
+$('tabs').hidden=true;$('tabs').innerHTML=C.map((k,i)=>`<button class="tab" aria-pressed="${i===0}" onclick="pick(${i})">${i+1}. ${k.n}</button>`).join('');
+function pick(i){cur=i;C.forEach((_,j)=>{$('k'+j).hidden=j!==i});[...$('tabs').children].forEach((b,j)=>b.setAttribute('aria-pressed',j===i));$('dlmsg').textContent='';upd()}
+function upd(){const c=Object.values(D[cur]).filter(Boolean).length;$('bar').style.width=c*20+'%';$('score').textContent=c+' dari 5 langkah benar'+(c===5?'. Kerja bagus, kelompok!':'')}
+function mark(i,n,ok,msg){D[i][n]=ok;const e=$(i+'-f'+n);e.textContent=msg;e.className='fb '+(ok?'ok':'bad');$(i+'-t'+n).classList.toggle('done',ok);upd()}
+function c1(i){const s=[...document.querySelectorAll('input[name="c1-'+i+'"]:checked')].map(e=>e.value).sort().join();
+ s==='r1,r2'?mark(i,1,true,'Tepat. Itu dua sumber daya yang dibatasi.'):mark(i,1,false,'Belum tepat. Cari dua hal yang punya angka batas di kasus.')}
+function c2(i){const k=C[i],e1=prop(num(i+'-a1'),num(i+'-b1'),num(i+'-k1'),k.r1.a,k.r1.b,k.r1.c),e2=prop(num(i+'-a2'),num(i+'-b2'),num(i+'-k2'),k.r2.a,k.r2.b,k.r2.c);
+ e1&&e2?mark(i,2,true,'Kedua persamaan benar.'):mark(i,2,false,(e1?'':'Persamaan '+k.r1.n.toLowerCase()+' belum tepat. ')+(e2?'':'Persamaan '+k.r2.n.toLowerCase()+' belum tepat. ')+'Ingat: biaya per program dikali jumlah program.')}
+function c3(i){const k=C[i];num(i+'-x3')===k.sol.x&&num(i+'-y3')===k.sol.y?mark(i,3,true,'Hasil benar.'):mark(i,3,false,'Hasil belum tepat. Eliminasi salah satu variabel, lalu cek di langkah 4.')}
+function c4(i){const k=C[i],x=num(i+'-x3'),y=num(i+'-y3');if(isNaN(x)||isNaN(y)){mark(i,4,false,'Isi x dan y di langkah 3 terlebih dahulu.');return}
+ const a=k.r1.a*x+k.r1.b*y,b=k.r2.a*x+k.r2.b*y,ok=a===k.r1.c&&b===k.r2.c;
+ mark(i,4,ok,k.r1.n+' terpakai '+f(a)+' dari '+f(k.r1.c)+' '+k.r1.u+'; '+k.r2.n.toLowerCase()+' '+f(b)+' dari '+f(k.r2.c)+' '+k.r2.u+'. '+(ok?'Keduanya habis terpakai.':'Masih ada selisih, periksa lagi langkah 3.'))}
+function c5(i){const k=C[i],s=k.s,dx=s.x-k.sol.x,dy=s.y-k.sol.y,key=(dx>0?'u':'d')+(dy>0?'u':'d'),ok=num(i+'-x5')===s.x&&num(i+'-y5')===s.y,d=$(i+'-d5').value===key;
+ ok&&d?mark(i,5,true,'Benar. Program A '+(dx>0?'naik':'turun')+' dari '+k.sol.x+' menjadi '+s.x+', Program B '+(dy>0?'naik':'turun')+' dari '+k.sol.y+' menjadi '+s.y+'.'):mark(i,5,false,ok?'Hitungan benar, tetapi dampaknya belum tepat.':'Hitungan belum tepat. Susun ulang persamaan dengan batas yang baru.')}
+function lab(i){const k=C[i],x=+$(i+'-sa').value,y=+$(i+'-sb').value;$(i+'-va').textContent=x;$(i+'-vb').textContent=y;
+ const a=k.r1.a*x+k.r1.b*y,b=k.r2.a*x+k.r2.b*y;
+ [[1,a,k.r1],[2,b,k.r2]].forEach(([n,v,r])=>{$(i+'-gl'+n).textContent=f(v)+' dari '+f(r.c)+' '+r.u;const g=$(i+'-g'+n);g.style.width=Math.min(100,v/r.c*100)+'%';g.className='gf'+(v>r.c?' over':v===r.c?' full':'')});
+ $(i+'-lm').textContent=a>k.r1.c||b>k.r2.c?'Ada batas yang terlewati.':(a===k.r1.c&&b===k.r2.c?'Kedua sumber daya habis terpakai. Catat kombinasinya.':'Masih ada sisa sumber daya.')}
+C.forEach((_,i)=>lab(i));
+async function simpan(){const k=C[cur],sec=$('k'+cur);
+ const L=['LKM Pertemuan 6 (S2): '+k.t,'Kelompok: '+$('kel').value,'Anggota: '+$('ang').value,'Kemajuan: '+Object.values(D[cur]).filter(Boolean).length+' dari 5 langkah benar',''];
+ sec.querySelectorAll('input:not([type=range]):not([type=checkbox]),textarea,select').forEach(e=>{L.push((e.getAttribute('aria-label')||e.placeholder||e.id)+': '+e.value)});
+ if(!dlns){const t=L.join('\n');$('dlmsg').innerHTML='Unduhan belum tersedia di tampilan ini. Salin teks berikut:<textarea id="cp" rows="8"></textarea>';$('cp').value=t;$('cp').select();return}
+ try{await dlns.save({filename:'LKM6-S2-kasus-4.txt',data:L.join('\n')});$('dlmsg').textContent='Hasil kerja tersimpan.'}
+ catch(e){$('dlmsg').textContent=e&&e.code==='declined'?'Penyimpanan dibatalkan.':'Penyimpanan tidak tersedia di tampilan ini.'}}
+(async()=>{try{const d=window.claude&&await window.claude.use('downloads');if(d){dlns=d;$('dl').hidden=false}}catch(e){}})();
+</script>
+</body>
+</html>
